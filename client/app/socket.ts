@@ -5,7 +5,7 @@ const isLocalhost = isBrowser && window.location.hostname === "localhost";
 
 export const SOCKET_URL = isLocalhost
   ? `http://localhost:4000`
-  : "https://realtime-project-firebase.onrender.com";
+  : "https://x0msg.onrender.com";
 
 const socket = io(SOCKET_URL, {
   transports: ["websocket"],

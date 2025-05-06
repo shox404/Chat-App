@@ -3,10 +3,7 @@ import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://realtime-project-firebase-web.vercel.app",
-];
+const allowedOrigins = ["http://localhost:3000", "https://x0msg.vercel.app"];
 
 const app = express();
 
