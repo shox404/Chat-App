@@ -9,7 +9,5 @@ export const generateToken = (data: object) => {
 export const verifyToken = (token: string) => {
   try {
     return jwt.verify(token, SECRET);
-  } catch (err) {
-    return null;
-  }
+  } catch {}
 };

@@ -65,10 +65,6 @@ export default function SignInPage() {
           response.data.error || "Something went wrong. Please try again."
         );
       }
-    } catch (error: any) {
-      setError(
-        error.response?.data?.error || "An error occurred. Please try again."
-      );
     } finally {
       setIsLoading(false);
     }
