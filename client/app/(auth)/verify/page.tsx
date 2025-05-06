@@ -1,120 +1,128 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Loader2, CheckCircle2 } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Input } from "@/components/ui/input";
+import axios from "axios";
 
 export default function VerifyPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const email = searchParams.get("email") || ""
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
 
-  const [verificationCode, setVerificationCode] = useState(["", "", "", "", "", ""])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isVerified, setIsVerified] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(60)
-  const [resendDisabled, setResendDisabled] = useState(true)
+  const [verificationCode, setVerificationCode] = useState([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [resendDisabled, setResendDisabled] = useState(true);
 
-  // Handle countdown for resend button
   useEffect(() => {
     if (timeLeft > 0 && resendDisabled) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
     } else if (timeLeft === 0) {
-      setResendDisabled(false)
+      setResendDisabled(false);
     }
-  }, [timeLeft, resendDisabled])
+  }, [timeLeft, resendDisabled]);
 
-  // Handle input focus and navigation
   const handleChange = (index: number, value: string) => {
     if (value.length > 1) {
-      value = value.charAt(0)
+      value = value.charAt(0);
     }
 
-    const newCode = [...verificationCode]
-    newCode[index] = value
-    setVerificationCode(newCode)
+    const newCode = [...verificationCode];
+    newCode[index] = value;
+    setVerificationCode(newCode);
 
-    // Auto-focus next input
     if (value && index < 5) {
-      const nextInput = document.getElementById(`code-${index + 1}`)
+      const nextInput = document.getElementById(`code-${index + 1}`);
       if (nextInput) {
-        nextInput.focus()
+        nextInput.focus();
       }
     }
-  }
+  };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Handle backspace
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     if (e.key === "Backspace" && !verificationCode[index] && index > 0) {
-      const prevInput = document.getElementById(`code-${index - 1}`)
+      const prevInput = document.getElementById(`code-${index - 1}`);
       if (prevInput) {
-        prevInput.focus()
+        prevInput.focus();
       }
     }
-  }
+  };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    const pastedData = e.clipboardData.getData("text").trim()
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
 
     if (/^\d+$/.test(pastedData) && pastedData.length <= 6) {
-      const newCode = [...verificationCode]
+      const newCode = [...verificationCode];
 
       for (let i = 0; i < pastedData.length; i++) {
         if (i < 6) {
-          newCode[i] = pastedData.charAt(i)
+          newCode[i] = pastedData.charAt(i);
         }
       }
 
-      setVerificationCode(newCode)
+      setVerificationCode(newCode);
 
-      // Focus the next empty input or the last one
-      const lastFilledIndex = Math.min(pastedData.length - 1, 5)
-      const nextInput = document.getElementById(`code-${lastFilledIndex}`)
+      const lastFilledIndex = Math.min(pastedData.length - 1, 5);
+      const nextInput = document.getElementById(`code-${lastFilledIndex}`);
       if (nextInput) {
-        nextInput.focus()
+        nextInput.focus();
       }
     }
-  }
+  };
 
   const handleResendCode = async () => {
-    setResendDisabled(true)
-    setTimeLeft(60)
+    setResendDisabled(true);
+    setTimeLeft(60);
 
-    // Simulate API call to resend code
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("Resending verification code to:", email)
-  }
+    console.log("Resending verification code to:", email);
+  };
 
   const handleVerify = async () => {
-    const code = verificationCode.join("")
+    const code = verificationCode.join("");
 
     if (code.length !== 6) {
-      return
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // Simulate API verification
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      const response = await axios.post("/api/auth/verify", { email, code });
 
-    console.log("Verifying code:", code)
-    setIsLoading(false)
-    setIsVerified(true)
-
-    // Redirect after successful verification
-    setTimeout(() => {
-      router.push("/sign-in")
-    }, 2000)
-  }
+      if (response.status === 200) {
+        setIsVerified(true);
+        setTimeout(() => {
+          router.push("/sign-in");
+        }, 2000);
+      } else {
+        alert(response.data.error || "Verification failed");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while verifying the code.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
@@ -127,7 +135,8 @@ export default function VerifyPage() {
             <CheckCircle2 className="h-16 w-16 text-green-500" />
             <h1 className="text-2xl font-bold">Email Verified!</h1>
             <p className="text-muted-foreground">
-              Your email has been successfully verified. Redirecting you to sign in...
+              Your email has been successfully verified. Redirecting you to sign
+              in...
             </p>
           </div>
         ) : (
@@ -135,7 +144,8 @@ export default function VerifyPage() {
             <div className="text-center">
               <h1 className="text-3xl font-bold">Verify Your Email</h1>
               <p className="mt-2 text-muted-foreground">
-                We&apos;ve sent a verification code to <span className="font-medium">{email}</span>
+                We&apos;ve sent a verification code to{" "}
+                <span className="font-medium">{email}</span>
               </p>
             </div>
 
@@ -193,5 +203,5 @@ export default function VerifyPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

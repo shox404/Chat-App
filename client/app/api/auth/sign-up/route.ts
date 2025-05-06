@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOneDocByField, createDoc } from "@/app/_firebase/utils";
 import { sendVerificationCode } from "@/lib/mailer";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
@@ -29,8 +30,10 @@ export async function POST(req: Request) {
       );
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     await createDoc("pendingVerifications", { email, code });
-    await createDoc("users", { email, password });
+    await createDoc("users", { email, password: hashedPassword });
 
     return NextResponse.redirect(new URL("/verify", req.url));
   } catch (error) {

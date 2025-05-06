@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ export default function SignInPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,14 +50,28 @@ export default function SignInPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setError(null);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await axios.post("/api/auth/sign-in", {
+        email: values.email,
+        password: values.password,
+      });
 
-    console.log(values);
-    setIsLoading(false);
-
-    router.push("/");
+      if (response.status === 200) {
+        router.push("/");
+      } else {
+        setError(
+          response.data.error || "Something went wrong. Please try again."
+        );
+      }
+    } catch (error: any) {
+      setError(
+        error.response?.data?.error || "An error occurred. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -68,6 +84,8 @@ export default function SignInPage() {
           <h1 className="text-3xl font-bold">Welcome Back</h1>
           <p className="mt-2 text-muted-foreground">Sign in to your account</p>
         </div>
+
+        {error && <p className="text-red-500 text-center">{error}</p>}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

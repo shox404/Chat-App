@@ -50,9 +50,16 @@ export async function POST(req: Request) {
 
   const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "10d" });
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     message: "User verified and created",
     token,
-    user: { email },
   });
+  response.cookies.set("auth_token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 10 * 24 * 60 * 60,
+    path: "/",
+  });
+
+  return response;
 }

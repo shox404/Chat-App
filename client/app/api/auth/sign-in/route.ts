@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getOneDocByField } from "@/app/_firebase/utils";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function POST(req: Request) {
   try {
@@ -17,25 +20,33 @@ export async function POST(req: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "User not found. Please sign up." },
-        { status: 404 }
+        { error: "Invalid credentials" },
+        { status: 401 }
       );
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
       return NextResponse.json(
-        { error: "Incorrect password" },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
 
-    return NextResponse.json({
-      message: "Login successful",
-      user: {
-        email: user.email,
-      },
+    const token = jwt.sign({ email: user.email }, JWT_SECRET, {
+      expiresIn: "10d",
     });
+
+    const response = NextResponse.json({ message: "Login successful", token });
+
+    response.cookies.set("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 10 * 24 * 60 * 60,
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
     console.error("SIGN-IN ERROR:", error);
     return NextResponse.json(

@@ -57,7 +57,7 @@ export default function SignUpPage() {
       if (response.request.responseURL.includes("/sign-in")) {
         router.push("/sign-in");
       } else if (response.request.responseURL.includes("/verify")) {
-        router.push("/verify");
+        router.push(`/verify/?email=${values.email}`);
       }
     } finally {
       setIsLoading(false);
