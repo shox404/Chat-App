@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       expiresIn: "10d",
     });
 
-    const response = NextResponse.json({ message: "Login successful", token });
+    const response = NextResponse.json({ message: "Login successful" });
 
     response.cookies.set("auth_token", token, {
       httpOnly: true,

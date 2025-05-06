@@ -111,7 +111,7 @@ export default function VerifyPage() {
       if (response.status === 200) {
         setIsVerified(true);
         setTimeout(() => {
-          router.push("/sign-in");
+          router.push("/");
         }, 2000);
       } else {
         alert(response.data.error || "Verification failed");
