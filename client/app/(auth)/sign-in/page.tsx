@@ -55,7 +55,6 @@ export default function SignInPage() {
     console.log(values);
     setIsLoading(false);
 
-    // Redirect to dashboard or home page after successful login
     router.push("/");
   }
 

@@ -1,32 +1,15 @@
 "use client";
 
+import { signInWithGoogle } from "@/app/_firebase/functions";
 import { Button } from "@/components/ui/button";
 
-interface GoogleAuthButtonProps {
-  text?: string;
-  className?: string;
-  onClick?: () => void;
-}
-
-export function GoogleAuthButton({
-  text = "Sign in with Google",
-  className = "",
-  onClick,
-}: GoogleAuthButtonProps) {
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    } else {
-      console.log("Google authentication triggered");
-    }
-  };
-
+export function GoogleAuthButton() {
   return (
     <Button
       type="button"
       variant="outline"
-      className={`w-full flex items-center justify-center gap-2 ${className}`}
-      onClick={handleClick}
+      className={`w-full flex items-center justify-center gap-2`}
+      onClick={signInWithGoogle}
     >
       <svg
         width="18"
@@ -52,7 +35,7 @@ export function GoogleAuthButton({
         />
         <path fill="none" d="M0 0h48v48H0z" />
       </svg>
-      {text}
+      Sign in with Google
     </Button>
   );
 }
