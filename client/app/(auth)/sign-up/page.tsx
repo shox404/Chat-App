@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GoogleAuthButton } from "@/components/google-auth-button";
+import axios from "axios";
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -48,15 +49,19 @@ export default function SignUpPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await axios.post("/api/auth/sign-up", values);
 
-    console.log(values);
-    setIsLoading(false);
-
-    router.push(`/verify?email=${encodeURIComponent(values.email)}`);
+      if (response.request.responseURL.includes("/sign-in")) {
+        router.push("/sign-in");
+      } else if (response.request.responseURL.includes("/verify")) {
+        router.push("/verify");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

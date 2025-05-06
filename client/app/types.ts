@@ -3,3 +3,8 @@ export type User = {
   email: string | null;
   image: string | null;
 };
+
+export type SignUpUser = {
+  email: string;
+  passwordHash: string;
+};

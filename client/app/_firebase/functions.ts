@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 import { auth } from "./config";
 import { User } from "../types";
-import { createDoc, getOneDoc, getOneDocByField } from "./utils";
+import { createDoc, getOneDocByField } from "./utils";
 
 export const signUp = async (email: string, password: string) => {
   try {
